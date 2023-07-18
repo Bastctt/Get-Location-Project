@@ -1,13 +1,8 @@
 const button = document.querySelector("button");
 const resultDiv = document.getElementById("result");
-resultDiv.classList.add("result-container");
 
 button.addEventListener("click", () => {
-  // Vérifier si l'élément resultDiv est déjà visible
-  if (resultDiv.classList.contains("result-container")) {
-    resultDiv.classList.remove("result-container");
-    resultDiv.innerHTML = ""; // Effacer le contenu de resultDiv
-  } else {
+  if (resultDiv.style.display === "none") {
     navigator.geolocation.getCurrentPosition(position => {
       const { latitude, longitude } = position.coords;
       const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`;
@@ -15,10 +10,8 @@ button.addEventListener("click", () => {
       fetch(url)
         .then(res => res.json())
         .then(data => {
-          // Clear previous results
           resultDiv.innerHTML = "";
 
-          // Create and populate a table with the address data
           const table = document.createElement("table");
           for (const [key, value] of Object.entries(data.address)) {
             const row = table.insertRow();
@@ -28,18 +21,21 @@ button.addEventListener("click", () => {
             cell2.textContent = value;
           }
 
-          // Append the table to the result div
           resultDiv.appendChild(table);
-
-          // Ajouter à nouveau la classe pour afficher resultDiv
-          resultDiv.classList.add("result-container");
+          resultDiv.style.display = "block";
+          setTimeout(() => {
+            resultDiv.classList.add("show"); // Ajout de la classe "show" après un court délai
+          }, 10);
         })
         .catch(() => {
           resultDiv.textContent = "Erreur lors de la récupération des données depuis l'API";
-          resultDiv.classList.add("result-container"); // Ajouter la classe pour afficher resultDiv
         });
     });
+  } else {
+    resultDiv.classList.remove("show"); // Suppression de la classe "show" pour masquer avec l'animation
+    setTimeout(() => {
+      resultDiv.style.display = "none";
+      resultDiv.innerHTML = "";
+    }, 500); // Temps correspondant à la durée de l'animation en millisecondes
   }
 });
-
-
